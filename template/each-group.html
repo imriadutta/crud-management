@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ group.name }} | CRUD Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">CRUD Management</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard </a>
+                </li>
+                {% if request.session.user_is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Add User </a>
+                </li>
+                {% endif %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/groups">Groups </a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a href="/logout" class="btn btn-light my-2 my-sm-0"
+                    onclick="return confirm('Are you sure you want to logout?')" type="submit">Logout</a>
+            </form>
+        </div>
+    </nav>
+
+    <!-- alert -->
+    {% for message in messages %}
+    <div class="alert
+    {% if message.tags == 'error' %}
+    alert-danger
+    {% else %}
+    alert-{{ message.tags }}
+    {% endif %}
+    alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
+    <!-- group edit -->
+    <div class="group">
+        <h4>Edit Group</h4>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Group name</label>
+                    <input type="text" name="gname" class="form-control" value="{{ group.name }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Group admin</label>
+                    <input type="text" value="{{ group.admin.fullname }} ({{ group.admin.username }})"
+                        class="form-control" disabled>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Edit members</label>
+                {% for user in users %}
+                <div class="form-check">
+                    {% if user.username != request.session.username %}
+                    {% if user in group.members %}
+                    <input class="form-check-input" type="checkbox" name="{{ user.username }}" id="gridCheck" checked>
+                    {% else %}
+                    <input class="form-check-input" type="checkbox" name="{{ user.username }}" id="gridCheck">
+                    {% endif %}
+                    <label class="form-check-label" for="gridCheck">
+                        {{ user.fullname }} &nbsp;
+                        <span class="bg-light text-dark">&#40;{{ user.username }}&#41;</span>
+                    </label>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputJoineddate">Created on</label>
+                    <input type="text" class="form-control" id="inputJoineddate" value="{{ group.created_on }}"
+                        disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputModifiedon">Last modified on</label>
+                    <input type="text" class="form-control" id="inputModifiedon" value="{{ group.modified_on }}"
+                        disabled>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-dark" id="myButton">Save</button>
+        </form>
+    </div>
+
+</body>
+
+<style>
+    body {
+        margin: 1%;
+    }
+
+    h4 {
+        margin-bottom: 3%;
+    }
+
+    .group {
+        margin: 2% 15% 0 15%;
+    }
+
+    #myButton {
+        margin-top: 2%;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+
+</html>

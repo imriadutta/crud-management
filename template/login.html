@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | CRUD Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">CRUD Management</a>
+    </nav>
+
+    <!-- alert -->
+    {% for message in messages %}
+    <div class="alert
+    {% if message.tags == 'error' %}
+    alert-danger
+    {% else %}
+    alert-{{ message.tags }}
+    {% endif %}
+    alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
+    <!-- login form -->
+    <div class="login">
+        <h1 class="display-4 head">Login</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Username</label>
+                <input placeholder="johndoe" type="text" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input placeholder="••••••••" type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-dark">Login</button>
+        </form>
+    </div>
+
+</body>
+
+<style>
+    body {
+        margin: 1%;
+    }
+
+    .login {
+        margin: 5% 20% 0 20%;
+    }
+
+    .head {
+        margin-bottom: 5%;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+
+</html>
