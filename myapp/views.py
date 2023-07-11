@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from .models import *
 from django.contrib.auth import login as signin, logout as signout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.contrib import messages
+from .group import EachGroup
 
 
 @login_required(login_url='/login')
@@ -27,8 +28,11 @@ def login(request):
             request.session['user_is_staff'] = user.is_staff
             signin(request, user)
             messages.add_message(request, messages.SUCCESS,
-                                 'Successfully logged in.')
-            return redirect('/')
+                                 f'Successfully logged in. Welcome {user.fullname} !')
+            if request.GET.get('next', None):
+                return HttpResponseRedirect(request.GET['next'])
+            else:
+                return redirect('/')
         else:
             messages.add_message(request, messages.ERROR,
                                  'Wrong Username or Password.')
@@ -171,15 +175,6 @@ def create_group(request):
         'users': users,
     }
     return render(request, 'create-group.html', context)
-
-
-class EachGroup:
-    def __init__(self, name, admin, created_on, modified_on):
-        self.name = name
-        self.admin = admin
-        self.created_on = created_on
-        self.modified_on = modified_on
-        self.members = []
 
 
 @login_required(login_url='/login')
