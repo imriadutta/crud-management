@@ -153,18 +153,18 @@ def create_group(request):
             )
             group.save()
 
-            group_member = GroupMember.objects.create(
+            member = Member.objects.create(
                 group=group,
-                member=myuser,
+                user=myuser,
             )
-            group_member.save()
+            member.save()
             for user in users:
                 if request.POST.get(user.username):
-                    group_member = GroupMember.objects.create(
+                    member = Member.objects.create(
                         group=group,
-                        member=user,
+                        user=user,
                     )
-                    group_member.save()
+                    member.save()
 
             messages.add_message(
                 request, messages.SUCCESS, 'Successfully group created.')
@@ -189,7 +189,7 @@ def show_groups(request):
             created_on=group.created_on,
             modified_on=group.modified_on
         )
-        eachgroup.members = GroupMember.objects.filter(group=group)
+        eachgroup.members = Member.objects.filter(group=group)
         allgroups.append(eachgroup)
 
     context = {
@@ -223,7 +223,7 @@ def group_edit(request, gname):
             modified_on=group.modified_on
         )
         eachgroup.members = [
-            gm.member for gm in GroupMember.objects.filter(group=group)
+            m.user for m in Member.objects.filter(group=group)
         ]
     except Exception:
         messages.add_message(request, messages.ERROR, 'Group does not exist!')
@@ -236,25 +236,25 @@ def group_edit(request, gname):
                     request, messages.WARNING, 'Group name already exists!')
             else:
                 group.name = name
-                group_members = GroupMember.objects.filter(group=group)
-                group_members.delete()
+                members = Member.objects.filter(group=group)
+                members.delete()
 
                 myuser = User.objects.get(
                     username=request.session.get('username'))
                 users = User.objects.all()
 
-                group_member = GroupMember.objects.create(
+                member = Member.objects.create(
                     group=group,
-                    member=myuser,
+                    user=myuser,
                 )
-                group_member.save()
+                member.save()
                 for user in users:
                     if request.POST.get(user.username):
-                        group_member = GroupMember.objects.create(
+                        member = Member.objects.create(
                             group=group,
-                            member=user,
+                            user=user,
                         )
-                        group_member.save()
+                        member.save()
                 group.save()
 
                 messages.add_message(request, messages.SUCCESS,

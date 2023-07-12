@@ -57,6 +57,7 @@
     {% endfor %}
 
     <!-- group edit -->
+    {% if group.admin.username == request.session.username %}
     <div class="group">
         <h4>Edit Group</h4>
         <form method="post" enctype="multipart/form-data">
@@ -105,6 +106,56 @@
             <button type="submit" class="btn btn-dark" id="myButton">Save</button>
         </form>
     </div>
+
+    <!-- show group -->
+    {% else %}
+    <div class="group">
+        <h4>Show Group</h4>
+        <form>
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Group name</label>
+                    <input type="text" class="form-control" value="{{ group.name }}" disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Group admin</label>
+                    <input type="text" value="{{ group.admin.fullname }} ({{ group.admin.username }})"
+                        class="form-control" disabled>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Members</label>
+                {% for user in users %}
+                <div class="form-check">
+                    <ul>
+                        {% if user in group.members %}
+                        {% if user != group.admin %}
+                        <li>
+                            {{ user.fullname }}&nbsp;
+                            <span class="bg-light text-dark">&#40;{{ user.username }}&#41;</span>&nbsp;
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputJoineddate">Created on</label>
+                    <input type="text" class="form-control" id="inputJoineddate" value="{{ group.created_on }}"
+                        disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputModifiedon">Last modified on</label>
+                    <input type="text" class="form-control" id="inputModifiedon" value="{{ group.modified_on }}"
+                        disabled>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
 
 </body>
 

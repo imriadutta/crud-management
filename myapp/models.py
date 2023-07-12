@@ -18,6 +18,6 @@ class Group(models.Model):
     admin = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-class GroupMember(models.Model):
+class Member(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    member = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
