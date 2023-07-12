@@ -12,10 +12,3 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'name', 'admin')
-
-
-# class MemberSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Member
-#         fields = ('group', 'user')
-

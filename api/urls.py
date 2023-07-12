@@ -2,7 +2,9 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    # path('', getUsers),
+    path('', getdata),
+    path('add', setData),
+    path('remove', removeData),
 
     path('users', getUsers),
     path('user/<str:uname>', getUser),

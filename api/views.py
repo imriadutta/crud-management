@@ -1,3 +1,6 @@
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from myapp.models import *
@@ -106,3 +109,87 @@ def updateGroup(request, gname):
         if serializer.is_valid():
             serializer.save()
         return Response(serializer.data)
+
+
+@csrf_exempt
+def getdata(request):
+    if request.method == 'GET':
+        users = User.objects.all()
+        data = []
+
+        for user in users:
+            members = Member.objects.filter(user=user)
+            context = {
+                'username': user.username,
+                'groups': [m.group.name for m in members]
+            }
+            data.append(context)
+
+        return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def setData(request):
+    if request.method == 'POST':
+        request_data = json.loads(request.body)
+        username = request_data.get('username')
+        groupnames = request_data.get('groups')
+        if username and groupnames:
+            context = {
+                'username': username,
+                'groups': groupnames
+            }
+            try:
+                user = User.objects.get(username=username)
+                groups = []
+                for groupname in groupnames:
+                    groups += Group.objects.filter(name=groupname)
+            except Exception:
+                pass
+            else:
+                for group in groups:
+                    member = Member.objects.create(
+                        group=group,
+                        user=user
+                    )
+                    member.save()
+                data = {
+                    'message': 'Successfully added',
+                    'data': context
+                }
+                return JsonResponse(data)
+        else:
+            return JsonResponse({'message': 'Invalid data'}, status=400)
+
+    return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def removeData(request):
+    if request.method == 'DELETE':
+        request_data = json.loads(request.body)
+        username = request_data.get('username')
+        groupnames = request_data.get('groups')
+        if username and groupnames:
+            try:
+                user = User.objects.get(username=username)
+                groups = []
+                for groupname in groupnames:
+                    groups += Group.objects.filter(name=groupname)
+            except Exception:
+                pass
+            else:
+                for group in groups:
+                    member = Member.objects.filter(
+                        group=group,
+                        user=user
+                    )
+                    member.delete()
+                data = {
+                    'message': 'Successfully removed'
+                }
+                return JsonResponse(data)
+        else:
+            return JsonResponse({'message': 'Invalid data'}, status=400)
+
+    return JsonResponse({'message': 'Method not allowed'}, status=405)
