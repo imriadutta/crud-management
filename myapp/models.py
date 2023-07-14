@@ -9,6 +9,7 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, null=True)
     address = models.TextField(null=True)
     profile_picture = models.ImageField(upload_to='images/')
+    is_super = models.BooleanField(default=False)
 
 
 class Group(models.Model):
@@ -21,3 +22,10 @@ class Group(models.Model):
 class Member(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Notification(models.Model):
+    message = models.TextField()
+    receiver = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='receiver')
+    is_read = models.BooleanField(default=False)

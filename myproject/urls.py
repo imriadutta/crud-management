@@ -17,6 +17,8 @@ urlpatterns = [
     path('groups', show_groups),
     path('group-delete/<str:gname>', group_delete),
     path('group/<str:gname>', group_edit),
+    path('notification/<str:uname>', send_notifications),
+    path('read-notification', read_notification),
 
     path('api/', include('api.urls')),
 ]

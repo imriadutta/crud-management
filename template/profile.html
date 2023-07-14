@@ -7,10 +7,11 @@
     <title>Profile of {{ user.username }} | CRUD Management</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
         integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 
 <body>
-
     <!-- navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">CRUD Management</a>
@@ -69,18 +70,20 @@
     <div class="profile">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="form-group ppic">
-                <div style="margin-bottom: 3%;">
+            <div class="form-group">
+                <div class="ppic" style="margin-bottom: 3%;">
                     {% if user.profile_picture %}
-                    <img src="/media/{{ user.profile_picture }}" alt="profile Picture">
+                    <img src="/media/{{ user.profile_picture }}" alt="Profile Picture" id="current-image"
+                        class="img-fluid">
                     {% else %}
-                    <img src="/static/images/prof-pic.png" alt="Profile Picture">
+                    <img src="/static/images/prof-pic.png" alt="Profile Picture" id="current-image" class="img-fluid">
                     {% endif %}
                 </div>
                 <div>
-                    <label for="profpic" class="upload-label">Profile Picture</label>
-                    <input type="file" name="profile-picture" accept="image/*"
-                        name="profile-picture" id="profpic">
+                    <label for="upload-input" class="upload-label">Profile Picture</label>
+                    <input type="file" name="profile-picture" accept="image/*" name="profile-picture" id="upload-input">
+                    <div id="preview-container"></div>
+                    <button class="btn btn-dark mt-3" id="crop-button" type="button">Crop</button>
                 </div>
             </div>
             <div class="form-row">
@@ -194,6 +197,11 @@
         height: 150px;
         width: 150px;
     }
+
+    #preview-container img {
+        height: 250px;
+        width: 250px;
+    }
 </style>
 
 <script>
@@ -211,6 +219,64 @@
     });
 </script>
 
+<script>
+    $(document).ready(function () {
+        var cropper;
+
+        $('#upload-input').on('change', function (e) {
+            var files = e.target.files;
+            var reader = new FileReader();
+            reader.onload = function () {
+                var img = document.createElement('img');
+                img.src = reader.result;
+                $('#preview-container').empty().append(img);
+                cropper = new Cropper(img, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                });
+            }
+            reader.readAsDataURL(files[0]);
+        });
+
+        $('#crop-button').click(function () {
+            var canvas = cropper.getCroppedCanvas({
+                width: 200,
+                height: 200,
+            });
+            var croppedImage = canvas.toDataURL('image/*');
+
+            $('#current-image').attr('src', croppedImage);
+            cropper.destroy();
+            // $('#upload-input').val('');
+            $('#preview-container').empty();
+        });
+    });
+</script>
+
+<!-- <script>
+    $(document).ready(function () {
+        $('#crop-button').click(function () {
+            var canvas = cropper.getCroppedCanvas({
+                width: 200,
+                height: 200,
+            });
+            var croppedImage = canvas.toDataURL('image/jpeg');
+
+            $.ajax({
+                url: '/save-cropped-image/',
+                method: 'POST',
+                data: { image: croppedImage },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+</script> -->
+
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
@@ -218,5 +284,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
     crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
 
 </html>

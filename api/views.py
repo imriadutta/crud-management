@@ -5,12 +5,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from myapp.models import *
 from .serializers import *
-# from django.contrib.admin.views.decorators import staff_member_required
 from myapp.group import EachGroup
 from django.shortcuts import redirect
 
 
-# @staff_member_required(login_url='/login')
 @api_view(['GET'])
 def getUsers(request):
     users = User.objects.all()

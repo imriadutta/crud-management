@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
 from .models import *
 from django.contrib.auth import login as signin, logout as signout
 from django.contrib.auth.decorators import login_required
@@ -9,8 +10,20 @@ from .group import EachGroup
 
 @login_required(login_url='/login')
 def dashboard(request):
+    users = []
+    users += User.objects.filter(is_super=True)
+    users += User.objects.all().exclude(is_super=True)
+
+    user = User.objects.get(username=request.session.get('username'))
+    notifications = Notification.objects.filter(receiver=user).order_by('-id')
+    unread_notifications = Notification.objects.filter(
+        receiver=user, is_read=False).order_by('-id')
+    no = len(unread_notifications)
+
     context = {
-        'users': User.objects.all(),
+        'users': users,
+        'notifications': notifications,
+        'no': no,
     }
     return render(request, 'dashboard.html', context)
 
@@ -26,6 +39,7 @@ def login(request):
         if user and (user.password == password or check_password(password, user.password)):
             request.session['username'] = user.username
             request.session['user_is_staff'] = user.is_staff
+            request.session['user_is_super'] = user.is_super
             signin(request, user)
             messages.add_message(request, messages.SUCCESS,
                                  f'Successfully logged in. Welcome {user.fullname} !')
@@ -266,3 +280,59 @@ def group_edit(request, gname):
             'users': User.objects.all(),
         }
         return render(request, 'each-group.html', context)
+
+
+@staff_member_required(login_url='/login')
+def send_notifications(request, uname):
+    if request.session.get('user_is_super'):
+        context = {}
+        if uname == 'all':
+            users = User.objects.all().exclude(is_super=True)
+            context = {
+                'users': users,
+                'is_all': True
+            }
+            if request.method == 'POST':
+                message = request.POST.get('message')
+                for user in users:
+                    notification = Notification.objects.create(
+                        message=message,
+                        receiver=user
+                    )
+                    notification.save()
+                messages.add_message(request, messages.SUCCESS,
+                                     'Notification sent successfully.')
+                return redirect('/')
+        else:
+            user = User.objects.get(username=uname)
+            context = {
+                'user': user,
+                'is_all': False
+            }
+            if request.method == 'POST':
+                message = request.POST.get('message')
+                notification = Notification.objects.create(
+                    message=message,
+                    receiver=user
+                )
+                notification.save()
+                messages.add_message(request, messages.SUCCESS,
+                                     'Notification sent successfully.')
+                return redirect('/')
+
+        return render(request, 'send-notification.html', context)
+
+    return redirect('/')
+
+
+def read_notification(request):
+    if request.method == 'POST':
+        user = User.objects.get(username=request.session.get('username'))
+        notifications = Notification.objects.filter(receiver=user)
+        
+        for notification in notifications:
+            notification.is_read = True
+            notification.save()
+
+    # return HttpResponse(1)
+    return redirect('/')
